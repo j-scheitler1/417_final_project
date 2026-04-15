@@ -1,0 +1,47 @@
+name: CI Ekstazi RTS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-rts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Cache Ekstazi metadata
+        uses: actions/cache@v4
+        with:
+          path: .ekstazi
+          key: ${{ runner.os }}-ekstazi-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-ekstazi-
+
+      - name: Run RTS-enabled tests
+        run: mvn -B clean test -Dekstazi
+
+      - name: Save local Ekstazi metadata if produced in module dirs
+        if: always()
+        run: |
+          find . -type d -name ".ekstazi" || true
+
+      - name: Upload Surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-ekstazi
+          path: |
+            **/target/surefire-reports/*.xml
