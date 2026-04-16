@@ -1,0 +1,2 @@
+mvn -o test = Baseline
+mvn -o test -Dekstazi -Dmaven.repo.local=/tmp/codex-m2 = Tool
