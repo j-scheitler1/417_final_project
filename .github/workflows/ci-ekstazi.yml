@@ -22,21 +22,39 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Cache Ekstazi metadata
-        uses: actions/cache@v4
+      - name: Restore Ekstazi metadata
+        id: ekstazi-cache-restore
+        uses: actions/cache/restore@v4
         with:
           path: .ekstazi
-          key: ${{ runner.os }}-ekstazi-${{ github.ref_name }}
+          key: ${{ runner.os }}-ekstazi-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-ekstazi-${{ github.ref_name }}-
             ${{ runner.os }}-ekstazi-
+
+      - name: Show restored Ekstazi metadata
+        run: |
+          if [ -d .ekstazi ]; then
+            find .ekstazi -maxdepth 1 -type f | sort
+          else
+            echo "No cached .ekstazi directory restored"
+          fi
 
       - name: Run RTS-enabled tests
         run: mvn -B clean test -Dekstazi
 
-      - name: Save local Ekstazi metadata if produced in module dirs
+      - name: Show generated Ekstazi metadata and test reports
         if: always()
         run: |
           find . -type d -name ".ekstazi" || true
+          find target/surefire-reports -maxdepth 1 -type f | sort || true
+
+      - name: Save Ekstazi metadata
+        if: always() && hashFiles('.ekstazi/**') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .ekstazi
+          key: ${{ runner.os }}-ekstazi-${{ github.ref_name }}-${{ github.sha }}
 
       - name: Upload Surefire reports
         if: always()
@@ -45,3 +63,11 @@ jobs:
           name: surefire-reports-ekstazi
           path: |
             **/target/surefire-reports/*.xml
+            **/target/surefire-reports/*.txt
+
+      - name: Upload Ekstazi metadata
+        if: always() && hashFiles('.ekstazi/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ekstazi-metadata
+          path: .ekstazi/**

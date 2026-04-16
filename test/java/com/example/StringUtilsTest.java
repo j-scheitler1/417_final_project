@@ -1,44 +1,45 @@
 package com.example;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
 
-class StringUtilsTest {
+import static org.junit.Assert.*;
+
+public class StringUtilsTest {
 
     @Test
-    void reverseWorks() {
+    public void reverseWorks() {
         StringUtils s = new StringUtils();
         assertEquals("cba", s.reverse("abc"));
     }
 
     @Test
-    void reverseHandlesNull() {
+    public void reverseHandlesNull() {
         StringUtils s = new StringUtils();
         assertNull(s.reverse(null));
     }
 
     @Test
-    void blankCheckWorks() {
+    public void blankCheckWorks() {
         StringUtils s = new StringUtils();
         assertTrue(s.isBlank("   "));
         assertFalse(s.isBlank("hello"));
     }
 
     @Test
-    void countWordsIgnoresExtraWhitespace() {
+    public void countWordsIgnoresExtraWhitespace() {
         StringUtils s = new StringUtils();
         assertEquals(4, s.countWords("  regression   test   selection demo "));
     }
 
     @Test
-    void palindromeCheckIgnoresCaseAndPunctuation() {
+    public void palindromeCheckIgnoresCaseAndPunctuation() {
         StringUtils s = new StringUtils();
         assertTrue(s.isPalindrome("A man, a plan, a canal: Panama"));
         assertFalse(s.isPalindrome("Regression testing"));
     }
 
     @Test
-    void titleCaseNormalizesInput() {
+    public void titleCaseNormalizesInput() {
         StringUtils s = new StringUtils();
         assertEquals("Final Project Report", s.toTitleCase("   fINAL   project REPORT "));
     }
